@@ -1,0 +1,227 @@
+================================================================================
+                 DUITNOW QR PAYMENT - GETTING STARTED
+================================================================================
+
+Welcome! This guide will get you testing DuitNow QR payments in 5 minutes.
+
+================================================================================
+                         STEP 1: VERIFY SETUP
+================================================================================
+
+Double-click: VERIFY_SETUP.bat
+
+This will check:
+  ✓ Node.js installed
+  ✓ npm installed
+  ✓ Flutter installed (optional)
+  ✓ All dependencies installed
+
+If anything is missing, the script will tell you what to install.
+
+================================================================================
+                      STEP 2: START THE BACKEND
+================================================================================
+
+Double-click: START_BACKEND.bat
+
+You should see:
+  🚀 DuitNow Test Server running on http://localhost:3000
+
+Keep this window open! The server must run continuously.
+
+================================================================================
+                       STEP 3: CHOOSE TEST METHOD
+================================================================================
+
+OPTION A - Browser Test (Easiest, No Flutter Needed)
+────────────────────────────────────────────────────
+1. Open: backend\test-page.html in your web browser
+2. Click any amount button (e.g., "Pay RM 25.50")
+3. QR code will appear
+4. Click "Simulate Payment (Test)" button
+5. Wait 7 seconds
+6. Status changes to "PAYMENT SUCCESSFUL" ✓
+
+This is the fastest way to test!
+
+
+OPTION B - Flutter Mobile App (Full Experience)
+────────────────────────────────────────────────
+Double-click: START_FLUTTER.bat
+
+This will:
+  • Install Flutter dependencies
+  • Launch app in Chrome browser
+  • Show home screen with payment options
+
+Then:
+  1. Click "Pay RM 25.50" or "Pay RM 100.00"
+  2. QR code appears
+  3. Click "Simulate Payment (Test)"
+  4. Watch status change from WAITING to PAID
+
+
+OPTION C - Test on Real Phone
+────────────────────────────────────────────────
+1. Find your computer's IP address:
+   - Open Command Prompt
+   - Type: ipconfig
+   - Look for "IPv4 Address" (e.g., 192.168.1.100)
+
+2. Edit frontend\main.dart:
+   - Find line: static const String backendUrl = 'http://localhost:3000';
+   - Change to: static const String backendUrl = 'http://192.168.1.100:3000';
+   - Save the file
+
+3. Connect phone via USB (make sure USB debugging enabled)
+
+4. Run: START_FLUTTER.bat
+   or
+   cd frontend
+   flutter run
+
+5. Select your phone from device list
+
+6. App installs and runs on your phone!
+
+================================================================================
+                       WHAT YOU SHOULD SEE
+================================================================================
+
+Backend Console:
+  ✅ Order created: ORD1729180000123 for RM25.50
+  🎭 Simulating payment for order ORD1729180000123...
+  💰 Payment received for order ORD1729180000123 - Status: PAID
+
+Flutter/Browser:
+  • QR Code (black and white squares)
+  • Order ID: ORD1729180000123
+  • Amount: RM 25.50
+  • Status: WAITING (orange) → PAID (green)
+
+================================================================================
+                          TROUBLESHOOTING
+================================================================================
+
+Problem: "Port 3000 already in use"
+Solution: Another app is using port 3000
+  1. Close any other servers
+  2. Or change port in backend\duitnow-test-server.js (line 4)
+
+Problem: "Connection refused" in Flutter app
+Solution: Backend not running or wrong URL
+  1. Make sure START_BACKEND.bat is running
+  2. Test http://localhost:3000/health in browser
+  3. Should return: {"status":"ok","timestamp":"..."}
+
+Problem: Flutter not found
+Solution: 
+  • Download from: https://flutter.dev/docs/get-started/install
+  • OR just use browser test (Option A) - no Flutter needed!
+
+Problem: QR code not showing in browser
+Solution:
+  1. Check browser console (press F12)
+  2. Make sure backend is running
+  3. Try refreshing the page
+
+Problem: Cannot test on phone
+Solution:
+  1. Make sure phone and computer on same WiFi
+  2. Use computer's IP address, not "localhost"
+  3. Allow port 3000 in Windows Firewall
+
+================================================================================
+                          TESTING TIPS
+================================================================================
+
+1. Start Simple
+   • Use browser test first (backend\test-page.html)
+   • Then try Flutter on Chrome
+   • Finally test on phone
+
+2. Backend Must Run
+   • Keep START_BACKEND.bat window open
+   • Don't close it while testing
+   • You'll see logs for each action
+
+3. Multiple Payments
+   • Each payment gets unique Order ID
+   • Can create multiple orders
+   • Each tracked separately
+
+4. Reset Testing
+   • Just close and restart backend
+   • All orders cleared (in-memory storage)
+   • Fresh start
+
+================================================================================
+                          NEXT STEPS
+================================================================================
+
+After successful testing:
+
+1. Read Documentation
+   • QUICKSTART.md - Fast setup guide
+   • README_DUITNOW_TEST.md - Detailed docs
+   • ARCHITECTURE.md - Technical details
+   • PROJECT_SUMMARY.md - Overview
+
+2. Customize
+   • Change amounts in frontend\main.dart
+   • Modify UI colors and styles
+   • Adjust polling interval
+   • Add more features
+
+3. Integrate
+   • Replace mock with real DuitNow API
+   • Add database (PostgreSQL)
+   • Implement authentication
+   • Deploy to production
+
+================================================================================
+                          QUICK REFERENCE
+================================================================================
+
+Files to Run:
+  • VERIFY_SETUP.bat      - Check prerequisites
+  • START_BACKEND.bat     - Start server
+  • START_FLUTTER.bat     - Launch Flutter app
+  • TEST_API.bat          - Test API endpoints
+
+Key Files:
+  • backend\duitnow-test-server.js   - Main server
+  • backend\mockDuitNowAPI.js        - QR generation
+  • backend\test-page.html           - Browser test UI
+  • frontend\main.dart               - Flutter app
+
+URLs:
+  • http://localhost:3000/health          - Health check
+  • http://localhost:3000/api/orders      - View all orders
+  • file:///.../backend/test-page.html    - Browser test
+
+Commands:
+  npm start              - Start backend
+  npm test               - Check versions
+  flutter run            - Run Flutter app
+  flutter run -d chrome  - Run in browser
+
+================================================================================
+                          SUPPORT
+================================================================================
+
+Need Help?
+  1. Read QUICKSTART.md first
+  2. Run VERIFY_SETUP.bat
+  3. Check console logs for errors
+  4. Test with browser first (simplest)
+  5. Verify backend is running
+
+================================================================================
+
+                    🎉 HAPPY TESTING! 🎉
+
+      You now have a complete DuitNow QR payment testing environment!
+
+================================================================================
+

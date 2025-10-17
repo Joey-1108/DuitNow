@@ -1,9 +1,22 @@
 {
+  "name": "duitnow-test-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/duitnow-test-server.js",
+    "dev": "node backend/duitnow-test-server.js",
+    "test": "node --version && npm list"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "axios": "^1.12.2",
     "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4"
   }

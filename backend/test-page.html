@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DuitNow QR Payment Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .amount-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .qr-container {
+            text-align: center;
+            margin: 30px 0;
+            display: none;
+        }
+        
+        .qr-container.show {
+            display: block;
+        }
+        
+        #qrImage {
+            max-width: 300px;
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .order-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .order-info.show {
+            display: block;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .info-label {
+            color: #666;
+            font-weight: 600;
+        }
+        
+        .info-value {
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .simulate-btn {
+            background: #28a745;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .simulate-btn:hover {
+            background: #218838;
+        }
+        
+        .reset-btn {
+            background: #6c757d;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        .loader.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #004085;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏦 DuitNow QR Payment Test</h1>
+        
+        <div class="amount-buttons">
+            <button onclick="createOrder(25.50)">Pay RM 25.50</button>
+            <button onclick="createOrder(100.00)">Pay RM 100.00</button>
+            <button onclick="createOrder(50.75)">Pay RM 50.75</button>
+            <button onclick="createOrder(999.99)">Pay RM 999.99</button>
+        </div>
+        
+        <div class="loader" id="loader"></div>
+        
+        <div class="qr-container" id="qrContainer">
+            <img id="qrImage" src="" alt="QR Code">
+        </div>
+        
+        <div class="order-info" id="orderInfo">
+            <div class="info-row">
+                <span class="info-label">Order ID:</span>
+                <span class="info-value" id="orderId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Amount:</span>
+                <span class="info-value" id="amount">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Created:</span>
+                <span class="info-value" id="createdAt">-</span>
+            </div>
+        </div>
+        
+        <div id="timer" style="display: none; text-align: center; margin: 20px 0; padding: 15px; background: #d4edda; border: 2px solid #28a745; border-radius: 10px; font-size: 18px; font-weight: bold; color: #155724;">
+            ⏱️ Time Left: <span id="timeRemaining">60</span>s
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div id="actionButtons" style="display: none;">
+            <button class="simulate-btn" id="simulateBtn" onclick="simulatePayment()">
+                💳 Simulate Payment (Test)
+            </button>
+            <button class="reset-btn" onclick="reset()">
+                🔄 New Payment
+            </button>
+        </div>
+        
+        <div class="instructions">
+            <strong>📱 Instructions:</strong><br>
+            1. Click an amount to generate QR code<br>
+            2. Scan with banking app OR click "Simulate Payment"<br>
+            3. Watch status update in real-time<br>
+            <br>
+            <strong>Note:</strong> Make sure backend server is running on port 3000
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        let currentOrderId = null;
+        let pollingInterval = null;
+        let countdownInterval = null;
+        let expiresAt = null;
+
+        async function createOrder(amount) {
+            try {
+                showLoader();
+                hideAll();
+                
+                const response = await fetch(`${API_URL}/api/create-order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create order');
+                
+                const data = await response.json();
+                currentOrderId = data.orderId;
+                expiresAt = new Date(data.expiresAt);
+                
+                hideLoader();
+                displayOrder(data);
+                startCountdown();
+                startPolling();
+                
+            } catch (error) {
+                hideLoader();
+                showStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function displayOrder(data) {
+            document.getElementById('qrImage').src = data.qr;
+            document.getElementById('orderId').textContent = data.orderId;
+            document.getElementById('amount').textContent = `RM ${data.amount.toFixed(2)}`;
+            document.getElementById('createdAt').textContent = new Date().toLocaleString();
+            
+            document.getElementById('qrContainer').classList.add('show');
+            document.getElementById('orderInfo').classList.add('show');
+            document.getElementById('actionButtons').style.display = 'block';
+            document.getElementById('timer').style.display = 'block';
+            
+            showStatus('⏳ WAITING FOR PAYMENT', 'waiting');
+        }
+        
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                const now = new Date();
+                const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+                
+                const timerEl = document.getElementById('timer');
+                const timeRemainingEl = document.getElementById('timeRemaining');
+                timeRemainingEl.textContent = remaining;
+                
+                // Change color based on time left
+                if (remaining > 30) {
+                    timerEl.style.background = '#d4edda';
+                    timerEl.style.borderColor = '#28a745';
+                    timerEl.style.color = '#155724';
+                } else if (remaining > 10) {
+                    timerEl.style.background = '#fff3cd';
+                    timerEl.style.borderColor = '#ffc107';
+                    timerEl.style.color = '#856404';
+                } else {
+                    timerEl.style.background = '#f8d7da';
+                    timerEl.style.borderColor = '#dc3545';
+                    timerEl.style.color = '#721c24';
+                }
+                
+                if (remaining === 0) {
+                    stopCountdown();
+                    showStatus('⏰ PAYMENT EXPIRED', 'error');
+                    document.getElementById('simulateBtn').disabled = true;
+                    stopPolling();
+                }
+            }, 1000);
+        }
+        
+        function stopCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+        }
+        
+        async function startPolling() {
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`${API_URL}/api/order/${currentOrderId}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'PAID') {
+                        showStatus('✅ PAYMENT SUCCESSFUL', 'paid');
+                        stopPolling();
+                        stopCountdown();
+                        document.getElementById('simulateBtn').style.display = 'none';
+                    } else if (data.status === 'EXPIRED') {
+                        showStatus('⏰ PAYMENT EXPIRED', 'error');
+                        stopPolling();
+                        stopCountdown();
+                        document.getElementById('simulateBtn').disabled = true;
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 3000);
+        }
+        
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+        
+        async function simulatePayment() {
+            try {
+                const response = await fetch(`${API_URL}/api/simulate-payment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: currentOrderId })
+                });
+                
+                if (response.ok) {
+                    showStatus('🎭 Payment simulation triggered... (7s)', 'waiting');
+                }
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status show ${type}`;
+        }
+        
+        function showLoader() {
+            document.getElementById('loader').classList.add('show');
+        }
+        
+        function hideLoader() {
+            document.getElementById('loader').classList.remove('show');
+        }
+        
+        function hideAll() {
+            document.getElementById('qrContainer').classList.remove('show');
+            document.getElementById('orderInfo').classList.remove('show');
+            document.getElementById('status').classList.remove('show');
+            document.getElementById('actionButtons').style.display = 'none';
+            document.getElementById('timer').style.display = 'none';
+        }
+        
+        function reset() {
+            stopPolling();
+            stopCountdown();
+            currentOrderId = null;
+            expiresAt = null;
+            document.getElementById('simulateBtn').disabled = false;
+            document.getElementById('simulateBtn').style.display = 'inline-block';
+            hideAll();
+            hideLoader();
+        }
+    </script>
+</body>
+</html>
+

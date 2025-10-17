@@ -29,12 +29,25 @@ export async function createDuitNowQR(orderId, amount) {
 
 // Simulate DuitNow calling back the backend after payment
 export async function simulatePaymentCallback(orderId, backendUrl) {
-  console.log("Simulating DuitNow callback...");
+  console.log("🎭 Simulating DuitNow callback in 7 seconds...");
   setTimeout(async () => {
-    await fetch(`${backendUrl}/api/payment-callback`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, status: "PAID" }),
-    });
+    try {
+      // Use dynamic import for node-fetch if native fetch is not available
+      const fetchFn = globalThis.fetch || (await import('node-fetch')).default;
+      
+      const response = await fetchFn(`${backendUrl}/api/payment-callback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: "PAID" }),
+      });
+      
+      if (response.ok) {
+        console.log(`✅ Payment callback successful for order ${orderId}`);
+      } else {
+        console.log(`⚠️ Payment callback failed: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(`❌ Payment callback error:`, error.message);
+    }
   }, 7000); // simulate 7 sec delay
 }
