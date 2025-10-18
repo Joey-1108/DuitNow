@@ -44,7 +44,7 @@ app.post('/api/create-order', async (req, res) => {
       }
     }, 60000);
 
-    console.log(`✅ Order created: ${orderId} for RM${amount} (expires in 60s)`);
+    console.log(`✅ Order created: ${orderId} for RM${amount} (expires in 60s) at ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}`);
 
     res.json({
       orderId,
@@ -52,6 +52,7 @@ app.post('/api/create-order', async (req, res) => {
       qr,
       status: 'WAITING',
       expiresAt: expiresAt.toISOString(),
+      createdAt: new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' }),
     });
   } catch (error) {
     console.error('Error creating order:', error);
@@ -88,7 +89,7 @@ app.post('/api/payment-callback', (req, res) => {
   order.status = status;
   order.paidAt = new Date();
   
-  console.log(`💰 Payment received for order ${orderId} - Status: ${status}`);
+  console.log(`💰 Payment received for order ${orderId} - Status: ${status} at ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}`);
 
   res.json({ success: true, orderId, status });
 });
