@@ -140,7 +140,7 @@ class _DuitNowQRPageState extends State<DuitNowQRPage> {
   
   // Change this to your computer's IP address when testing on physical device
   // For emulator, use 10.0.2.2 (Android) or localhost (iOS)
-  static const String backendUrl = 'http://localhost:3000';
+  static const String backendUrl = 'http://192.168.1.101:3000';
 
   @override
   void initState() {

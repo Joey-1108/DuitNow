@@ -214,7 +214,7 @@ class _AutoPaymentPageState extends State<AutoPaymentPage> {
   DateTime? expiresAt;
   
   // Change this to your backend URL
-  static const String backendUrl = 'http://localhost:3000';
+  static const String backendUrl = 'http://192.168.1.101:3000';
 
   @override
   void initState() {
